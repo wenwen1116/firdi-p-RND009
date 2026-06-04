@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RND-009 作業架構流程圖</title>
+    <style>
+      :root {
+        --bg: #eef2f5;
+        --panel: #ffffff;
+        --line: #cfd8df;
+        --text: #1f2a33;
+        --muted: #647480;
+        --accent: #0f766e;
+        --blue: #2563eb;
+        --green: #16824b;
+        --amber: #a16207;
+        --red: #b42318;
+        --purple: #6d28d9;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;
+      }
+
+      button {
+        min-height: 32px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: 46px 1fr;
+        height: 100vh;
+      }
+
+      .menubar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #fbfcfd;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 280px;
+      }
+
+      .logo {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 15px;
+      }
+
+      .brand span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .toolbar button {
+        width: 34px;
+        padding: 0;
+        font-weight: 700;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 230px minmax(780px, 1fr) 290px;
+        min-height: 0;
+      }
+
+      .sidebar,
+      .inspector {
+        min-height: 0;
+        overflow: auto;
+        border-right: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      .inspector {
+        border-right: 0;
+        border-left: 1px solid var(--line);
+      }
+
+      .panel-block {
+        padding: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel-block h2 {
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
+
+      .shape-list {
+        display: grid;
+        gap: 9px;
+      }
+
+      .shape-item {
+        display: grid;
+        grid-template-columns: 38px 1fr;
+        gap: 9px;
+        align-items: center;
+        min-height: 44px;
+        padding: 7px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #fff;
+      }
+
+      .shape-sample {
+        height: 26px;
+        border: 2px solid var(--blue);
+        background: #eff6ff;
+      }
+
+      .shape-sample.rounded {
+        border-radius: 14px;
+        border-color: var(--green);
+        background: #ecfdf3;
+      }
+
+      .shape-sample.diamond {
+        width: 25px;
+        height: 25px;
+        margin-left: 6px;
+        transform: rotate(45deg);
+        border-color: var(--amber);
+        background: #fffbeb;
+      }
+
+      .shape-sample.store {
+        border-color: var(--purple);
+        background: #f5f3ff;
+        border-radius: 50% / 18%;
+      }
+
+      .shape-item span {
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .mini-map {
+        position: relative;
+        height: 140px;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(#dce4ea 1px, transparent 1px),
+          linear-gradient(90deg, #dce4ea 1px, transparent 1px);
+        background-size: 14px 14px;
+      }
+
+      .mini-node {
+        position: absolute;
+        border: 1px solid #6b7280;
+        background: rgba(37, 99, 235, .16);
+      }
+
+      .canvas-shell {
+        min-width: 0;
+        min-height: 0;
+        overflow: auto;
+        background:
+          linear-gradient(#d7e0e6 1px, transparent 1px),
+          linear-gradient(90deg, #d7e0e6 1px, transparent 1px),
+          linear-gradient(#edf2f5 1px, transparent 1px),
+          linear-gradient(90deg, #edf2f5 1px, transparent 1px);
+        background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+        background-position: -1px -1px;
+      }
+
+      .canvas {
+        position: relative;
+        width: 1340px;
+        height: 860px;
+        margin: 28px;
+        background: rgba(255, 255, 255, .72);
+        box-shadow: 0 10px 28px rgba(31, 41, 51, .12);
+      }
+
+      .diagram-title {
+        position: absolute;
+        left: 34px;
+        top: 24px;
+        color: #334155;
+      }
+
+      .diagram-title h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .diagram-title p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      svg.connectors {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .lane {
+        position: absolute;
+        border: 1px solid #bdd3df;
+        border-radius: 8px;
+        background: rgba(241, 245, 249, .62);
+      }
+
+      .lane-label {
+        position: absolute;
+        top: -15px;
+        left: 16px;
+        padding: 3px 8px;
+        border: 1px solid #bdd3df;
+        border-radius: 999px;
+        background: #fff;
+        color: #34515d;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .node {
+        position: absolute;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 5px;
+        width: 166px;
+        min-height: 74px;
+        padding: 10px 12px;
+        border: 2px solid var(--blue);
+        border-radius: 5px;
+        background: #eff6ff;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(31, 41, 51, .1);
+      }
+
+      .node strong {
+        font-size: 14px;
+        line-height: 1.35;
+      }
+
+      .node span {
+        color: #465866;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .node.start {
+        border-color: var(--green);
+        border-radius: 999px;
+        background: #ecfdf3;
+      }
+
+      .node.decision {
+        width: 118px;
+        height: 118px;
+        min-height: 118px;
+        border-color: var(--amber);
+        background: #fffbeb;
+        transform: rotate(45deg);
+      }
+
+      .node.decision > div {
+        transform: rotate(-45deg);
+      }
+
+      .node.store {
+        border-color: var(--purple);
+        border-radius: 50% / 16%;
+        background: #f5f3ff;
+      }
+
+      .node.output {
+        border-color: var(--accent);
+        background: #ecfdf5;
+      }
+
+      .node.risk {
+        border-color: var(--red);
+        background: var(--red-bg);
+      }
+
+      .note {
+        position: absolute;
+        width: 230px;
+        padding: 12px;
+        border: 1px solid #f0c36a;
+        border-radius: 4px;
+        background: #fff8dc;
+        color: #5f4700;
+        font-size: 13px;
+        line-height: 1.55;
+        box-shadow: 0 3px 8px rgba(31, 41, 51, .08);
+      }
+
+      .inspector h2 {
+        margin: 0 0 10px;
+        font-size: 15px;
+      }
+
+      .inspector p,
+      .inspector li {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .inspector ul,
+      .inspector ol {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+
+      .property {
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 8px;
+        padding: 7px 0;
+        border-bottom: 1px solid #edf1f4;
+        font-size: 13px;
+      }
+
+      .property span:first-child {
+        color: var(--muted);
+      }
+
+      @media (max-width: 980px) {
+        body {
+          overflow: auto;
+        }
+
+        .app {
+          height: auto;
+        }
+
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar,
+        .inspector {
+          border: 0;
+          border-bottom: 1px solid var(--line);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="menubar">
+        <div class="brand">
+          <div class="logo">QC</div>
+          <div>
+            <strong>RND-009 作業架構流程圖</strong>
+            <span>Drawio-like Process Map</span>
+          </div>
+        </div>
+        <div class="toolbar" aria-label="工具列">
+          <button type="button" title="選取">↖</button>
+          <button type="button" title="連線">→</button>
+          <button type="button" title="放大">＋</button>
+          <button type="button" title="縮小">−</button>
+          <button type="button" title="對齊">≡</button>
+          <button type="button" title="格線">#</button>
+        </div>
+        <div class="status">畫布：RND-009 資料清洗、品管分析與最佳條件建議流程</div>
+      </header>
+
+      <div class="workspace">
+        <aside class="sidebar">
+          <section class="panel-block">
+            <h2>圖形</h2>
+            <div class="shape-list">
+              <div class="shape-item"><div class="shape-sample rounded"></div><span>開始 / 結束</span></div>
+              <div class="shape-item"><div class="shape-sample"></div><span>處理程序</span></div>
+              <div class="shape-item"><div class="shape-sample diamond"></div><span>判斷節點</span></div>
+              <div class="shape-item"><div class="shape-sample store"></div><span>資料檔案</span></div>
+            </div>
+          </section>
+          <section class="panel-block">
+            <h2>圖層</h2>
+            <div class="property"><span>Layer 1</span><strong>資料輸入</strong></div>
+            <div class="property"><span>Layer 2</span><strong>清洗決策</strong></div>
+            <div class="property"><span>Layer 3</span><strong>分析報表</strong></div>
+            <div class="property"><span>Layer 4</span><strong>本地服務</strong></div>
+          </section>
+          <section class="panel-block">
+            <h2>縮圖</h2>
+            <div class="mini-map">
+              <div class="mini-node" style="left:18px;top:22px;width:32px;height:18px"></div>
+              <div class="mini-node" style="left:70px;top:22px;width:38px;height:18px"></div>
+              <div class="mini-node" style="left:128px;top:48px;width:32px;height:32px"></div>
+              <div class="mini-node" style="left:54px;top:92px;width:44px;height:20px"></div>
+              <div class="mini-node" style="left:128px;top:98px;width:52px;height:20px"></div>
+            </div>
+          </section>
+        </aside>
+
+        <main class="canvas-shell">
+          <div class="canvas">
+            <div class="diagram-title">
+              <h1>RND-009 資料清洗與品管分析作業架構</h1>
+              <p>從原始 CSV 到人工治理、專案資料夾匯出，再到管理層品管報表。</p>
+            </div>
+
+            <div class="lane" style="left:30px;top:100px;width:280px;height:690px"><span class="lane-label">資料來源</span></div>
+            <div class="lane" style="left:340px;top:100px;width:420px;height:690px"><span class="lane-label">資料清洗工作台</span></div>
+            <div class="lane" style="left:790px;top:100px;width:230px;height:690px"><span class="lane-label">本地服務 / 專案資料夾</span></div>
+            <div class="lane" style="left:1050px;top:100px;width:250px;height:690px"><span class="lane-label">品管分析與決策建議</span></div>
+
+            <svg class="connectors" viewBox="0 0 1340 860" aria-hidden="true">
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L8,3 L0,6 Z" fill="#475569"></path>
+                </marker>
+              </defs>
+              <path d="M202 210 H390" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M556 210 H620 V295" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M620 415 V485" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M620 603 H860" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M930 645 V705 H1135 V650" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M930 565 V492 H1135 V445" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M1135 292 V365" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M1135 612 V555" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M1135 490 V432" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M460 575 H282 V305 H122 V248" stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="7 6" marker-end="url(#arrow)"></path>
+              <text x="634" y="460" fill="#647480" font-size="12">保留 / 刪除 / 補值</text>
+              <text x="728" y="586" fill="#647480" font-size="12">POST /api/save-csv</text>
+              <text x="1002" y="478" fill="#647480" font-size="12">讀取匯出檔內容</text>
+              <text x="1152" y="584" fill="#647480" font-size="12">條件歸納</text>
+            </svg>
+
+            <div class="node start" style="left:56px;top:174px">
+              <strong>原始 CSV</strong>
+              <span>RND-009_20260604.csv</span>
+            </div>
+
+            <div class="node store" style="left:56px;top:304px">
+              <strong>欄位結構</strong>
+              <span>批號、溫度、時間、水分、結果評分</span>
+            </div>
+
+            <div class="node" style="left:390px;top:174px">
+              <strong>讀取資料</strong>
+              <span>載入原始檔或匯入 CSV</span>
+            </div>
+
+            <div class="node" style="left:462px;top:292px">
+              <strong>資料品質偵測</strong>
+              <span>缺漏欄位、重複批號、格式混用</span>
+            </div>
+
+            <div class="node decision" style="left:561px;top:432px">
+              <div>
+                <strong>是否需要人工處置？</strong>
+                <span>逐筆決策</span>
+              </div>
+            </div>
+
+            <div class="node" style="left:452px;top:566px">
+              <strong>清洗決策</strong>
+              <span>刪除、保留、補資料、重複保留第一筆</span>
+            </div>
+
+            <div class="node output" style="left:842px;top:566px">
+              <strong>匯出清洗檔</strong>
+              <span>寫入專案資料夾</span>
+            </div>
+
+            <div class="node store" style="left:842px;top:690px">
+              <strong>專案資料夾</strong>
+              <span>reviewed CSV 成為報表資料來源</span>
+            </div>
+
+            <div class="node" style="left:1088px;top:250px">
+              <strong>標準化解析</strong>
+              <span>批號、日期、溫度 °C、A/B/C</span>
+            </div>
+
+            <div class="node" style="left:1088px;top:372px">
+              <strong>品管 KPI</strong>
+              <span>完整率、溫度合規率、風險批次</span>
+            </div>
+
+            <div class="node risk" style="left:1088px;top:492px">
+              <strong>最佳條件歸納</strong>
+              <span>7-8°C / 2026-07、2026-11</span>
+            </div>
+
+            <div class="node output" style="left:1088px;top:612px">
+              <strong>管理判讀</strong>
+              <span>候選最佳條件與驗證建議</span>
+            </div>
+
+            <div class="node" style="left:1088px;top:708px">
+              <strong>後續驗證</strong>
+              <span>增加樣本，確認製程標準</span>
+            </div>
+
+            <div class="note" style="left:356px;top:708px">
+              報表邏輯不是直接使用原始檔，而是使用「清洗後匯出檔」。最佳條件目前屬候選結論，需搭配樣本數限制一併管理。
+            </div>
+          </div>
+        </main>
+
+        <aside class="inspector">
+          <section class="panel-block">
+            <h2>頁面說明</h2>
+            <p>此頁模擬 draw.io 的編輯器環境：左側為圖形與圖層，中間為網格畫布，右側為流程屬性與管理說明。</p>
+          </section>
+          <section class="panel-block">
+            <h2>流程重點</h2>
+            <ol>
+              <li>讀取原始資料 `RND-009_20260604.csv`。</li>
+              <li>在清洗工作台偵測缺漏與重複批號。</li>
+              <li>由使用者決定刪除、保留或補資料。</li>
+              <li>匯出清洗檔到專案資料夾。</li>
+              <li>品管分析報表改以匯出檔作為分析來源。</li>
+              <li>依 A 評分率歸納候選最佳溫度時間組合。</li>
+            </ol>
+          </section>
+          <section class="panel-block">
+            <h2>最佳條件結論</h2>
+            <p>以結果評分 A 作為最佳品質判準，目前候選最佳操作條件如下：</p>
+            <ul>
+              <li>`7-8°C / 2026-07`：A 評分率 100%，樣本數 2。</li>
+              <li>`7-8°C / 2026-11`：A 評分率 100%，樣本數 2。</li>
+              <li>`6-7°C / 2026-02`：A 評分率 66.7%，樣本數 3。</li>
+            </ul>
+          </section>
+          <section class="panel-block">
+            <h2>管控觀點</h2>
+            <div class="property"><span>資料治理</span><strong>人工決策可追溯</strong></div>
+            <div class="property"><span>技術路徑</span><strong>HTML + 本地服務</strong></div>
+            <div class="property"><span>輸出結果</span><strong>reviewed CSV</strong></div>
+            <div class="property"><span>報表依據</span><strong>清洗後資料</strong></div>
+            <div class="property"><span>決策輸出</span><strong>候選最佳製程條件</strong></div>
+            <div class="property"><span>管理限制</span><strong>樣本數偏少，需再驗證</strong></div>
+          </section>
+          <section class="panel-block">
+            <h2>對應檔案</h2>
+            <ul>
+              <li>`rnd009-quality-suite.html`：整合工作台</li>
+              <li>`server.mjs`：本地讀檔與寫檔服務</li>
+              <li>`RND-009_20260604.csv`：原始資料</li>
+              <li>`*_reviewed.csv`：匯出分析資料</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>
