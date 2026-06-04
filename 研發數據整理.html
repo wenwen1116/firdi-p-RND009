@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研發數據整理 - RND-009 智能分析平台</title>
+  <!-- Outfit Font for clean typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Chart.js for gorgeous analytics charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons for clean aesthetic vector icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* Styling System (Bright, Warm & Friendly Theme with Professional Aesthetics) */
+    :root {
+      --bg-primary: #f1f5f9;        /* Warm Light Slate-100 */
+      --bg-secondary: #ffffff;      /* Pure White */
+      --bg-card: #ffffff;           /* Card White */
+      --bg-card-hover: #f8fafc;     /* Card Hover Slate-50 */
+      --border-color: #e2e8f0;      /* Slate-200 */
+      --border-glow: rgba(14, 165, 233, 0.15);
+      
+      --text-main: #1e293b;         /* Slate-800 for high readability */
+      --text-muted: #64748b;        /* Slate-500 */
+      --text-light: #94a3b8;        /* Slate-400 */
+      
+      --accent-color: #0284c7;      /* Friendly Sky Blue */
+      --accent-glow: rgba(2, 132, 199, 0.06);
+      
+      /* Target Ratings Colors */
+      --color-rating-a: #10b981;    /* Emerald Green for Rating A (Ideal) */
+      --color-rating-a-glow: rgba(16, 185, 129, 0.08);
+      --color-rating-b: #f59e0b;    /* Warm Amber for Rating B (Sub-ideal) */
+      --color-rating-b-glow: rgba(245, 158, 11, 0.08);
+      --color-rating-c: #ef4444;    /* Vibrant Red for Rating C (Warning/Fail) */
+      --color-rating-c-glow: rgba(239, 68, 68, 0.08);
+      
+      --success-color: #10b981;     /* Success Green */
+      --warning-color: #f59e0b;     /* Warning Yellow */
+      --danger-color: #ef4444;      /* Danger Red */
+      
+      --font-family: 'Outfit', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --transition: all 0.25s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+    
+    /* Layout styling */
+    aside {
+      width: 260px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo-container {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-color), #0ea5e9);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
+    }
+    
+    .logo-container i {
+      color: #fff;
+    }
+    
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+    }
+    
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    
+    .sidebar-menu {
+      flex: 1;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .nav-button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+    }
+    
+    .nav-button:hover {
+      color: var(--text-main);
+      background-color: var(--bg-primary);
+    }
+    
+    .nav-button.active {
+      color: var(--accent-color);
+      background-color: var(--accent-glow);
+      border-color: rgba(2, 132, 199, 0.15);
+      font-weight: 600;
+    }
+    
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .preset-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px;
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.05), rgba(16, 185, 129, 0.05));
+      border: 1px solid rgba(2, 132, 199, 0.2);
+      color: var(--text-main);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .preset-btn:hover {
+      border-color: var(--accent-color);
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(16, 185, 129, 0.1));
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 40px;
+      max-width: 1400px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    
+    .page-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .page-section.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Top dashboard stats */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .header-info h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    
+    .header-info p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      transition: var(--transition);
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--accent-color);
+    }
+    
+    .stat-card.success::before { background: var(--color-rating-a); }
+    .stat-card.warning::before { background: var(--color-rating-b); }
+    .stat-card.danger::before { background: var(--color-rating-c); }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+      background-color: var(--bg-card-hover);
+    }
+    
+    .stat-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .stat-info h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--text-main);
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stat-card.info .stat-icon { background: var(--accent-glow); color: var(--accent-color); }
+    .stat-card.success .stat-icon { background: var(--color-rating-a-glow); color: var(--color-rating-a); }
+    .stat-card.warning .stat-icon { background: var(--color-rating-b-glow); color: var(--color-rating-b); }
+    .stat-card.danger .stat-icon { background: var(--color-rating-c-glow); color: var(--color-rating-c); }
+    
+    /* Main Grid Panels */
+    .grid-panels {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    
+    .grid-panels.two-cols {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    @media (max-width: 1024px) {
+      .grid-panels.two-cols {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+    
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+    }
+    
+    .panel-title i {
+      color: var(--accent-color);
+    }
+    
+    .panel-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    /* Upload Panel Styling */
+    .upload-zone {
+      border: 2px dashed rgba(0, 0, 0, 0.12);
+      border-radius: 14px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      transition: var(--transition);
+      background: rgba(0, 0, 0, 0.005);
+    }
+    
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent-color);
+      background: var(--accent-glow);
+    }
+    
+    .upload-zone i {
+      color: var(--accent-color);
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    
+    .upload-zone p {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    
+    .upload-zone span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    /* Configuration styling */
+    .config-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .config-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .config-item label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    
+    .config-input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0 12px;
+      height: 42px;
+      transition: var(--transition);
+    }
+    
+    .config-input-wrapper:focus-within {
+      border-color: var(--accent-color);
+      background: #fff;
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.15);
+    }
+    
+    .config-input-wrapper input {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      width: 100%;
+      outline: none;
+    }
+    
+    .config-item-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      padding: 8px 0;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    
+    .config-item-checkbox input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-color), #0284c7);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
+    }
+    
+    .btn-primary:hover {
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, var(--color-rating-a), #059669);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+    }
+    
+    .btn-success:hover {
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .btn-outline {
+      border-color: var(--border-color);
+      background: #fff;
+      color: var(--text-main);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    .btn-outline:hover {
+      background: var(--bg-card-hover);
+      border-color: #cbd5e1;
+    }
+    
+    /* Table Styling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    
+    th {
+      background: #f8fafc;
+      padding: 14px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+    
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    
+    .badge-success { background: var(--color-rating-a-glow); color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .badge-warning { background: var(--color-rating-b-glow); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .badge-danger { background: var(--color-rating-c-glow); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .badge-info { background: var(--accent-glow); color: var(--accent-color); border: 1px solid rgba(2, 132, 199, 0.2); }
+    
+    /* Pagination and Search Filters */
+    .table-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .search-input {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      width: 240px;
+      transition: var(--transition);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    
+    .search-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.1);
+      width: 280px;
+    }
+    
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .page-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: var(--transition);
+    }
+    
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+    
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .page-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    /* Anomaly diagnostic panel components */
+    .anomaly-summary-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .anomaly-summary-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .anomaly-type-card {
+      padding: 16px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    }
+    
+    .anomaly-type-card.critical { border-left: 4px solid var(--danger-color); }
+    .anomaly-type-card.warning { border-left: 4px solid var(--warning-color); }
+    
+    .anomaly-type-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .critical .anomaly-type-icon { background: var(--color-rating-c-glow); color: var(--danger-color); }
+    .warning .anomaly-type-icon { background: var(--color-rating-b-glow); color: var(--warning-color); }
+    
+    .anomaly-type-info h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    
+    .anomaly-type-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    /* Charts layout styling */
+    .chart-container-wrapper {
+      position: relative;
+      height: 350px;
+      width: 100%;
+    }
+    
+    .report-card {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    
+    .report-title {
+      font-weight: 600;
+      font-size: 0.98rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+    }
+    
+    .report-content p {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    
+    .report-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-main);
+      margin-top: 6px;
+    }
+    
+    .report-bullet i {
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+    
+    /* Temp Suitability table */
+    .suitability-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+    }
+    .suitability-table th, .suitability-table td {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      font-size: 0.82rem;
+    }
+    .suitability-table th {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+    
+    .text-success { color: var(--color-rating-a) !important; }
+    .text-warning { color: var(--color-rating-b) !important; }
+    .text-danger { color: var(--color-rating-c) !important; }
+    
+    /* Empty State View */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    .empty-state-icon {
+      width: 64px;
+      height: 64px;
+      background: #f1f5f9;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+    
+    .empty-state h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    
+    .empty-state p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside>
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <i data-lucide="line-chart"></i>
+      </div>
+      <div>
+        <div class="brand-title">研發數據整理</div>
+        <div class="brand-subtitle">RND-009 Analysis Hub</div>
+      </div>
+    </div>
+    
+    <nav class="sidebar-menu">
+      <button class="nav-button active" onclick="switchTab('dashboard')">
+        <i data-lucide="layout-dashboard"></i>
+        主儀表板
+      </button>
+      <button class="nav-button" onclick="switchTab('cleaner')">
+        <i data-lucide="database-backup"></i>
+        數據匯入與清洗
+      </button>
+      <button class="nav-button" onclick="switchTab('anomaly')">
+        <i data-lucide="alert-triangle"></i>
+        異常數據診斷
+      </button>
+      <button class="nav-button" onclick="switchTab('analytics')">
+        <i data-lucide="trending-up"></i>
+        趨勢與深度分析
+      </button>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <button class="preset-btn" onclick="loadPresetData()">
+        <i data-lucide="sparkles"></i>
+        載入 RND-009 範例
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main>
+    
+    <!-- HEADER -->
+    <div class="dashboard-header">
+      <div class="header-info">
+        <h1 id="page-title">研發數據中心儀表板</h1>
+        <p id="page-subtitle">請匯入原始 CSV 檔案以展開數據處理與分析</p>
+      </div>
+      <div>
+        <span id="data-status-badge" class="badge badge-warning">未載入數據</span>
+      </div>
+    </div>
+    
+    <!-- STATS SUMMARY -->
+    <div class="stats-grid">
+      <div class="stat-card info">
+        <div class="stat-info">
+          <p>原始總批次數</p>
+          <h3 id="stat-total-raw">-</h3>
+        </div>
+        <div class="stat-icon">
+          <i data-lucide="hash"></i>
+        </div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-info">
+          <p>理想 A 級批次數</p>
+          <h3 id="stat-total-a">-</h3>
+        </div>
+        <div class="stat-icon">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-info">
+          <p>次理想 B 級批次數</p>
+          <h3 id="stat-total-b">-</h3>
+        </div>
+        <div class="stat-icon">
+          <i data-lucide="help-circle"></i>
+        </div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-info">
+          <p>需改善 C 級批次數</p>
+          <h3 id="stat-total-c">-</h3>
+        </div>
+        <div class="stat-icon">
+          <i data-lucide="alert-triangle"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 1: OVERVIEW DASHBOARD -->
+    <div id="section-dashboard" class="page-section active">
+      <div class="grid-panels two-cols">
+        <!-- Data Health Card -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><i data-lucide="shield-check"></i>數據完整性與清洗</h3>
+              <p class="panel-desc">過濾嚴重錯誤（剔除列）與警告統計</p>
+            </div>
+          </div>
+          
+          <div id="health-chart-wrapper" class="chart-container-wrapper" style="display: flex; align-items: center; justify-content: center;">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i data-lucide="database"></i></div>
+              <h3>尚未有可供分析的數據</h3>
+              <p>請前往「數據匯入與清洗」上傳 CSV，或點擊左下角「載入 RND-009 範例」快速試用。</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Results rating distribution -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><i data-lucide="pie-chart"></i>評分結果佔比分析</h3>
+              <p class="panel-desc">綠色系為理想 A 級，黃色系為次理想 B 級，紅色系為 C 級</p>
+            </div>
+          </div>
+          
+          <div id="rating-chart-wrapper" class="chart-container-wrapper" style="display: flex; align-items: center; justify-content: center;">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i data-lucide="bar-chart-3"></i></div>
+              <h3>無分佈統計</h3>
+              <p>數據清洗後將自動以評分佔比圖表呈現最終品質狀態。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick instructions or quick insights panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title"><i data-lucide="help-circle"></i>RND-009 數據整理規則說明</h3>
+            <p class="panel-desc">本工具專為 RND-009 研發數據設計，自動執行以下資料整理標準</p>
+          </div>
+        </div>
+        <div class="grid-panels two-cols" style="gap: 16px;">
+          <div class="report-card">
+            <div class="report-title"><i data-lucide="check" class="text-success"></i>數據清洗標準 (Cleaned CSV)</div>
+            <div class="report-content">
+              <div class="report-bullet"><i data-lucide="corner-down-right" class="text-muted" style="width: 14px;"></i> 批號格式標準化：提取數字轉換為 <b>B + 4 位數字</b>（如 BATCH1001 轉為 B1001）。</div>
+              <div class="report-bullet"><i data-lucide="corner-down-right" class="text-muted" style="width: 14px;"></i> 溫度單位統一：華氏度 (°F) 統一轉換為攝氏度 (°C)（轉換公式: (F-32) × 5/9，四捨五入至小數第二位）。</div>
+              <div class="report-bullet"><i data-lucide="corner-down-right" class="text-muted" style="width: 14px;"></i> 日期格式標準化：各種日期格式（如 1 Feb 2026, 2026/3/3, 20260707）統一轉換為 <b>YYYY-MM-DD</b>。</div>
+              <div class="report-bullet"><i data-lucide="corner-down-right" class="text-muted" style="width: 14px;"></i> 評級簡化：水分及結果評分將「項目1 / 項目2 / 項目3」簡化為「A / B / C」。</div>
+            </div>
+          </div>
+          <div class="report-card">
+            <div class="report-title"><i data-lucide="alert-circle" class="text-warning"></i>異常數據診斷標準 (Problematic Data)</div>
+            <div class="report-content">
+              <div class="report-bullet"><i data-lucide="x" class="text-danger" style="width: 14px;"></i> <b>嚴重錯誤 (剔除列)：</b> 缺失批號或重複的批號（清洗時將予以過濾以防干擾統計）。</div>
+              <div class="report-bullet"><i data-lucide="alert-triangle" class="text-warning" style="width: 14px;"></i> <b>警告項目 (保留但標記)：</b> 檢測溫度超出 2.0°C - 8.0°C 冷鏈範圍、日期/時間數據缺失、或者水分與結果評分缺失。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: DATA IMPORT AND CLEANING -->
+    <div id="section-cleaner" class="page-section">
+      <div class="grid-panels">
+        <!-- Import Control Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><i data-lucide="file-up"></i>匯入 CSV 原始數據</h3>
+              <p class="panel-desc">支持拖曳上傳、選擇檔案或在下方貼上 CSV 文字</p>
+            </div>
+          </div>
+          
+          <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <i data-lucide="upload-cloud" style="width: 48px; height: 48px;"></i>
+            <p>點擊此處或拖曳 RND-009 原始 CSV 檔案至此</p>
+            <span>支援 .csv 格式檔案</span>
+            <input type="file" id="file-input" style="display: none;" accept=".csv" onchange="handleFileSelect(event)">
+          </div>
+          
+          <!-- Configuration -->
+          <div class="config-group">
+            <div class="config-item">
+              <label>冷鏈溫度安全下限 (°C)</label>
+              <div class="config-input-wrapper">
+                <input type="number" id="cfg-temp-min" value="2.0" step="0.1">
+              </div>
+            </div>
+            <div class="config-item">
+              <label>冷鏈溫度安全上限 (°C)</label>
+              <div class="config-input-wrapper">
+                <input type="number" id="cfg-temp-max" value="8.0" step="0.1">
+              </div>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 16px;">
+            <label class="config-item-checkbox">
+              <input type="checkbox" id="cfg-standardize-batch" checked>
+              <span>自動標準化批號 (如 B1001)</span>
+            </label>
+            <label class="config-item-checkbox">
+              <input type="checkbox" id="cfg-remove-duplicates" checked>
+              <span>排除重複批次</span>
+            </label>
+          </div>
+          
+          <div style="display: flex; gap: 16px;">
+            <button class="btn btn-outline" onclick="loadPresetData()">載入範例 CSV</button>
+            <button class="btn btn-primary" onclick="processRawCSVInput()">開始清洗數據</button>
+          </div>
+          
+          <div class="config-item">
+            <label>CSV 文字預覽 / 手動輸入區</label>
+            <textarea id="raw-csv-textarea" style="width: 100%; height: 120px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); padding: 10px; font-family: monospace; font-size: 0.8rem; resize: vertical;" placeholder="批號,溫度,時間,水分,結果評分..."></textarea>
+          </div>
+        </div>
+        
+        <!-- Cleaned Result Panel -->
+        <div class="panel" id="cleaned-result-panel" style="display: none;">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><i data-lucide="check-square"></i>清洗整理後的資料集</h3>
+              <p class="panel-desc">已剔除無效/重複列，並對批號、溫度與日期進行了格式重整</p>
+            </div>
+            <div>
+              <button class="btn btn-success" onclick="downloadCleanedCSV()">
+                <i data-lucide="download"></i> 下載整理後的 CSV 檔
+              </button>
+            </div>
+          </div>
+          
+          <div class="table-actions">
+            <input type="text" class="search-input" id="cleaned-search" placeholder="搜尋批號、日期..." oninput="filterCleanedData()">
+            <div class="pagination">
+              <button class="page-btn" id="cleaned-prev-btn" onclick="changeCleanedPage(-1)"><i data-lucide="chevron-left" style="width: 16px;"></i></button>
+              <span class="page-info" id="cleaned-page-info">第 1 / 1 頁</span>
+              <button class="page-btn" id="cleaned-next-btn" onclick="changeCleanedPage(1)"><i data-lucide="chevron-right" style="width: 16px;"></i></button>
+            </div>
+          </div>
+          
+          <div class="table-container">
+            <table id="cleaned-table">
+              <thead>
+                <tr>
+                  <th>原始批號</th>
+                  <th>標準化批號</th>
+                  <th>溫度 (°C)</th>
+                  <th>日期</th>
+                  <th>水分評級</th>
+                  <th>結果評分</th>
+                  <th>狀態</th>
+                </tr>
+              </thead>
+              <tbody id="cleaned-table-body">
+                <!-- Rows populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: ANOMALY DIAGNOSTIC -->
+    <div id="section-anomaly" class="page-section">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title"><i data-lucide="shield-alert"></i>有問題的數據診斷報告</h3>
+            <p class="panel-desc">系統自動識別的格式錯誤、數據缺失與冷鏈溫度異常</p>
+          </div>
+        </div>
+        
+        <div class="anomaly-summary-cards">
+          <div class="anomaly-type-card critical">
+            <div class="anomaly-type-icon"><i data-lucide="x-circle"></i></div>
+            <div class="anomaly-type-info">
+              <h4>嚴重錯誤 (已排除剔除列)</h4>
+              <p>包含「缺失批號」或「重複批號」，共 <span id="count-critical" class="text-danger" style="font-weight: 700;">-</span> 筆。此類資料會損害統計正確性。</p>
+            </div>
+          </div>
+          <div class="anomaly-type-card warning">
+            <div class="anomaly-type-icon"><i data-lucide="alert-triangle"></i></div>
+            <div class="anomaly-type-info">
+              <h4>警告與異常 (保留於 cleaned 檔但標記)</h4>
+              <p>包含「溫度超出 2-8°C 區間」、「資料缺失」、「格式未標準化」，共 <span id="count-warning" class="text-warning" style="font-weight: 700;">-</span> 筆。</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Table actions for anomaly table -->
+        <div class="table-actions">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" id="anomaly-filter-all" onclick="filterAnomalyTable('all')">顯示全部</button>
+            <button class="btn btn-outline text-danger" id="anomaly-filter-critical" onclick="filterAnomalyTable('critical')">只看嚴重錯誤</button>
+            <button class="btn btn-outline text-warning" id="anomaly-filter-warning" onclick="filterAnomalyTable('warning')">只看警告項目</button>
+          </div>
+          <div class="pagination">
+            <button class="page-btn" id="anomaly-prev-btn" onclick="changeAnomalyPage(-1)"><i data-lucide="chevron-left" style="width: 16px;"></i></button>
+            <span class="page-info" id="anomaly-page-info">第 1 / 1 頁</span>
+            <button class="page-btn" id="anomaly-next-btn" onclick="changeAnomalyPage(1)"><i data-lucide="chevron-right" style="width: 16px;"></i></button>
+          </div>
+        </div>
+        
+        <!-- Diagnostic Table -->
+        <div class="table-container">
+          <table id="anomaly-table">
+            <thead>
+              <tr>
+                <th>原始行號</th>
+                <th>批號</th>
+                <th>檢測項目</th>
+                <th>原始數值</th>
+                <th>嚴重層級</th>
+                <th>問題與處理方式描述</th>
+              </tr>
+            </thead>
+            <tbody id="anomaly-table-body">
+              <!-- Render dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: TREND & DEPTH ANALYTICS -->
+    <div id="section-analytics" class="page-section">
+      <div class="grid-panels">
+        
+        <!-- Interactive temperature trend line chart -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><i data-lucide="thermometer"></i>溫度趨勢圖 (按日期排序)</h3>
+              <p class="panel-desc">呈現歷次批號在生產過程中的溫度變動。綠色底色區域為 2.0°C - 8.0°C 的標準安全冷鏈範圍，超出範圍的點已用高亮標記。</p>
+            </div>
+          </div>
+          <div class="chart-container-wrapper" style="height: 380px;">
+            <canvas id="tempTrendChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="grid-panels two-cols">
+          <!-- Moisture and final results analysis counts -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title"><i data-lucide="bar-chart-3"></i>檢測評分分佈統計</h3>
+                <p class="panel-desc">A 級為理想 (綠色)，B 級為次理想 (黃色)，C 級為需改善 (紅色)</p>
+              </div>
+            </div>
+            <div class="chart-container-wrapper" style="height: 280px;">
+              <canvas id="moistureResultChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Temperature Suitability Card based on Ratings -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title"><i data-lucide="badge-check"></i>各品質評估級別溫度分析</h3>
+                <p class="panel-desc">統計結果顯示，不同檢測評分下對應的生產控溫分佈</p>
+              </div>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+              <table class="suitability-table">
+                <thead>
+                  <tr>
+                    <th>評分評級</th>
+                    <th>樣本數</th>
+                    <th>溫度範圍 (°C)</th>
+                    <th>平均溫度 (°C)</th>
+                    <th>評級定義</th>
+                  </tr>
+                </thead>
+                <tbody id="suitability-table-body">
+                  <tr>
+                    <td class="text-success" style="font-weight: 700;">A 級</td>
+                    <td id="suit-count-a">-</td>
+                    <td id="suit-range-a">-</td>
+                    <td id="suit-avg-a" style="font-weight: 700;">-</td>
+                    <td><span class="badge badge-success">理想結果</span></td>
+                  </tr>
+                  <tr>
+                    <td class="text-warning" style="font-weight: 700;">B 級</td>
+                    <td id="suit-count-b">-</td>
+                    <td id="suit-range-b">-</td>
+                    <td id="suit-avg-b" style="font-weight: 700;">-</td>
+                    <td><span class="badge badge-warning">次理想結果</span></td>
+                  </tr>
+                  <tr>
+                    <td class="text-danger" style="font-weight: 700;">C 級</td>
+                    <td id="suit-count-c">-</td>
+                    <td id="suit-range-c">-</td>
+                    <td id="suit-avg-c" style="font-weight: 700;">-</td>
+                    <td><span class="badge badge-danger">待改善結果</span></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="font-size:0.78rem; color:var(--text-muted); line-height:1.4; margin-top:8px;">* 本表將自動關聯清洗後的數據，排除無效批次，以提供高信賴度的溫度指引。</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Results Summary R&D Report -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><i data-lucide="clipboard-list"></i>結果分析與研發總整理報告</h3>
+              <p class="panel-desc">基於清洗後數據與檢測評分自動判定合適生產溫度的智能研發診斷</p>
+            </div>
+          </div>
+          
+          <div class="grid-panels two-cols" style="gap: 20px;">
+            <!-- Performance report card -->
+            <div class="report-card">
+              <div class="report-title"><i data-lucide="check-circle" class="text-success"></i>研發評估與數據總結</div>
+              <div class="report-content" id="report-summary-text">
+                <!-- Javascript populates -->
+              </div>
+            </div>
+            
+            <!-- Recommendations card -->
+            <div class="report-card">
+              <div class="report-title"><i data-lucide="thermometer" class="text-success"></i>合適控溫區間判定</div>
+              <div class="report-content" id="report-suggestions">
+                <!-- Javascript populates -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+  </main>
+
+  <script>
+    // Embedded Raw CSV Data (RND-009.csv)
+    const PRESET_RAW_CSV = `批號,溫度,時間,水分,結果評分
+B1000,45.9°F,1 Feb 2026,項目3,項目2
+BATCH1001,43.2°F,2026-02-02,C,項目2
+B1002,44.1°F,2026/3/3,項目3,B
+BATCH1003,7.3°C,2026-04-04,A,C
+b-1004,3.2°C,5 Jun 2026,項目2,項目3
+b-1005,5.3°C,2026/6/6,C,C
+b-1006,41.2°F,20260707,A,項目2
+b-1007,7.6°C,2026-08-08,B,項目3
+B1008,3.6°C,2026/9/9,項目1,項目1
+b-1009,42.6°F,2026-10-10,項目3,項目3
+BATCH1010,7.5°C,20261111,項目2,A
+b-1011,41.4°F,2026-12-12,A,項目1
+B1012,5.0°C,2026/1/13,A,項目3
+BATCH1013,6.4°C,2026/2/14,項目2,項目1
+b-1014,40.3°F,15 Apr 2026,B,B
+B1015,3.0°C,20260416,項目1,B
+b-1016,7.5°C,2026/5/17,項目3,項目2
+B1017,3.7°C,2026-06-18,項目3,C
+b-1018,2.6°C,19 Feb 2026,C,C
+b-1019,5.6°C,2026-08-20,項目1,項目3
+BATCH1020,3.8°C,21 Apr 2026,B,A
+b-1021,4.1°C,22 May 2026,A,A
+BATCH1022,3.5°C,2026/11/23,項目1,C
+B1023,2.2°C,20261224,B,B
+B1024,38.7°F,2026/1/25,C,項目3
+b-1025,5.5°C,20260226,A,項目2
+b-1026,46.0°F,27 Apr 2026,項目3,C
+B1027,3.0°C,2026/4/28,A,項目1
+BATCH1028,41.0°F,,B,B
+b-1029,38.3°F,2026/6/2,項目1,項目3
+BATCH1030,7.2°C,2026-07-03,項目2,項目1
+B1031,41.7°F,2026-08-04,A,C
+BATCH1032,7.5°C,20260905,項目1,項目1
+BATCH1033,4.4°C,2026-10-06,項目3,A
+b-1034,43.2°F,2026/11/7,項目2,C
+BATCH1035,5.1°C,2026-12-08,項目1,C
+b-1036,44.6°F,9 Feb 2026,A,項目1
+BATCH1037,4.7°C,2026/2/10,C,項目2
+BATCH1038,3.9°C,20260311,B,B
+B1039,37.9°F,20260412,項目1,C
+b-1040,7.9°C,20260513,項目1,項目2
+B1041,3.6°C,20260614,C,B
+BATCH1042,39.7°F,15 Feb 2026,項目2,B
+b-1043,6.6°C,20260816,B,C
+B1044,4.8°C,17 Apr 2026,項目2,B
+b-1045,2.9°C,20261018,C,項目2
+B1046,40.6°F,2026/11/19,C,項目1
+b-1047,4.2°C,2026-12-20,A,B
+b-1048,4.0°C,21 Feb 2026,項目3,項目3
+b-1049,35.8°F,22 Mar 2026,項目3,項目3
+B1050,8.0°C,2026/3/23,A,A
+BATCH1051,6.8°C,2026-04-24,C,A
+B1052,4.6°C,20260525,C,項目3
+b-1053,45.1°F,2026-06-26,項目3,A
+b-1054,45.1°F,2026/7/27,C,A
+B1055,37.4°F,28 Mar 2026,項目2,項目3
+BATCH1056,5.4°C,2026-09-01,B,B
+b-1057,6.3°C,2026/10/2,A,B
+BATCH1058,43.5°F,20261103,項目3,B
+b-1059,36.3°F,20261204,B,項目2
+BATCH1060,43.5°F,20260105,項目3,A
+BATCH1061,6.4°C,2026/2/6,A,A
+BATCH1062,35.8°F,7 Apr 2026,,項目3
+BATCH1063,37.8°F,2026/4/8,A,C
+B1064,7.5°C,2026/5/9,A,C
+BATCH1065,6.6°C,2026/6/10,C,A
+b-1066,4.9°C,20260711,項目1,C
+BATCH1067,37.4°F,2026-08-12,項目3,C
+B1068,2.1°C,2026/9/13,A,B
+BATCH1069,3.2°C,2026-10-14,A,B
+B1070,41.0°F,2026-11-15,項目2,項目2
+BATCH1071,3.8°C,16 Jan 2026,項目3,項目1
+B1072,6.1°C,2026-01-17,A,B
+BATCH1073,6.4°C,18 Mar 2026,項目2,B
+b-1074,41.2°F,2026/3/19,C,項目2
+B1075,8.0°C,2026/4/20,項目2,C
+b-1076,4.4°C,21 Jun 2026,項目2,項目2
+b-1077,5.1°C,2026-06-22,項目3,C
+,39.0°F,23 Feb 2026,項目1,項目3
+BATCH1079,3.8°C,20260824,項目2,項目3
+BATCH1080,4.9°C,2026/9/25,項目2,項目2
+B1081,6.2°C,2026-10-26,項目3,A
+b-1082,7.2°C,2026/11/27,項目3,A
+BATCH1083,2.1°C,28 Jan 2026,項目1,B
+B1084,2.8°C,1 Feb 2026,項目3,項目3
+b-1085,44.6°F,20260202,項目1,項目2
+B1086,7.2°C,2026/3/3,A,項目1
+b-1087,2.5°C,4 May 2026,項目1,項目2
+b-1088,41.7°F,5 Jun 2026,項目3,項目3
+BATCH1089,4.9°C,6 Jan 2026,A,A
+B1090,3.2°C,2026-07-07,項目1,B
+BATCH1091,44.4°F,2026-08-08,C,B
+B1092,7.9°C,2026-09-09,A,C
+BATCH1093,3.3°C,2026/10/10,A,項目3
+B1094,36.7°F,20261111,C,A
+B1095,35.8°F,2026-12-12,項目2,項目2
+BATCH1096,7.5°C,2026-01-13,C,C
+BATCH1097,4.9°C,2026/2/14,項目3,A
+b-1098,43.7°F,15 Apr 2026,A,B
+BATCH1099,6.9°C,16 May 2026,項目2,C
+B1046,40.6°F,2026/11/19,C,項目1`;
+
+    // Global state
+    let rawCSVString = "";
+    let dataHeaders = [];
+    let cleanedData = []; // format: [origBatch, stdBatch, tempC, date, moisture, result]
+    let anomaliesList = []; // format: { rowIdx, batch, colName, value, type, msg }
+    let chartInstances = {};
+    
+    // Pagination state
+    let cleanedPage = 1;
+    const itemsPerPage = 15;
+    let filteredCleanedData = [];
+    
+    let anomalyPage = 1;
+    let anomalyFilter = 'all';
+    let filteredAnomalies = [];
+
+    // Drag and drop events
+    const dropZone = document.getElementById('drop-zone');
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if(files.length) {
+        handleFile(files[0]);
+      }
+    });
+
+    // Initialize Lucide Icons
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+
+    function switchTab(tabId) {
+      // Toggle sidebar button active state
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.remove('active');
+        if(btn.getAttribute('onclick').includes(tabId)) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // Toggle page visibility
+      document.querySelectorAll('.page-section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      document.getElementById(`section-${tabId}`).classList.add('active');
+      
+      // Update page title
+      const titleEl = document.getElementById('page-title');
+      const subtitleEl = document.getElementById('page-subtitle');
+      if (tabId === 'dashboard') {
+        titleEl.textContent = '研發數據中心儀表板';
+        subtitleEl.textContent = '檢視專案 RND-009 的數據整理概況及健康狀況指標';
+      } else if (tabId === 'cleaner') {
+        titleEl.textContent = '數據匯入與清洗工具';
+        subtitleEl.textContent = '匯入原始 CSV 以自動排版、更正溫度單位與過濾有問題的數據';
+      } else if (tabId === 'anomaly') {
+        titleEl.textContent = '有問題的數據診斷';
+        subtitleEl.textContent = '自動篩選並整理批號重複、數據缺失及溫度偏移等警示報告';
+      } else if (tabId === 'analytics') {
+        titleEl.textContent = '數據趨勢與深度分析';
+        subtitleEl.textContent = '動態折線圖、評等分佈及冷鏈製程合適溫度判定報告';
+        // Resize charts to fit correctly
+        setTimeout(() => {
+          Object.values(chartInstances).forEach(c => c.resize());
+        }, 100);
+      }
+    }
+
+    function loadPresetData() {
+      document.getElementById('raw-csv-textarea').value = PRESET_RAW_CSV.trim();
+      processRawCSVInput();
+      alert("已成功加載 RND-009 原始範例數據！請檢視清洗後的資料表格與圖表分析。");
+    }
+
+    function handleFileSelect(event) {
+      const files = event.target.files;
+      if (files.length) {
+        handleFile(files[0]);
+      }
+    }
+
+    function handleFile(file) {
+      if (file.name.substring(file.name.lastIndexOf('.')) !== '.csv') {
+        alert("請上傳 CSV 格式的檔案！");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('raw-csv-textarea').value = e.target.result;
+        processRawCSVInput();
+      };
+      reader.readAsText(file);
+    }
+
+    function processRawCSVInput() {
+      const textInput = document.getElementById('raw-csv-textarea').value.trim();
+      if (!textInput) {
+        alert("請輸入或匯入 CSV 數據內容！");
+        return;
+      }
+      
+      rawCSVString = textInput;
+      parseAndCleanData(textInput);
+    }
+
+    // CSV Parser
+    function parseCSV(text) {
+      let lines = [];
+      let row = [""];
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        let c = text[i];
+        let next = text[i+1];
+        if (c === '"') {
+          if (inQuotes && next === '"') {
+            row[row.length - 1] += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (c === ',' && !inQuotes) {
+          row.push("");
+        } else if ((c === '\r' || c === '\n') && !inQuotes) {
+          if (c === '\r' && next === '\n') {
+            i++;
+          }
+          lines.push(row);
+          row = [""];
+        } else {
+          row[row.length - 1] += c;
+        }
+      }
+      if (row.length > 1 || row[0] !== "") {
+        lines.push(row);
+      }
+      return lines;
+    }
+
+    // Helper functions for formatting
+    function standardizeBatch(batch) {
+      if (!batch) return '';
+      const cleanBatch = batch.trim();
+      const numMatch = cleanBatch.match(/\d+/);
+      if (numMatch) {
+        return 'B' + numMatch[0].padStart(4, '0');
+      }
+      return cleanBatch.toUpperCase();
+    }
+
+    function parseTemperature(tempStr) {
+      if (!tempStr || tempStr.trim() === '') {
+        return { value: null, original: tempStr, isFahrenheit: false, error: '溫度數據缺失' };
+      }
+      const valStr = tempStr.trim();
+      const numMatch = valStr.match(/(-?\d+(\.\d+)?)/);
+      if (!numMatch) {
+        return { value: null, original: tempStr, isFahrenheit: false, error: '溫度數值無法解析' };
+      }
+      let val = parseFloat(numMatch[1]);
+      let isFahrenheit = false;
+      if (valStr.toUpperCase().includes('F') || val > 15) {
+        isFahrenheit = true;
+        val = (val - 32) * 5 / 9;
+      }
+      val = Math.round(val * 100) / 100;
+      return { value: val, original: tempStr, isFahrenheit };
+    }
+
+    function parseDate(dateStr) {
+      if (!dateStr || dateStr.trim() === '') return '';
+      const str = dateStr.trim();
+      
+      if (/^\d{8}$/.test(str)) {
+        const y = str.substring(0, 4);
+        const m = str.substring(4, 6);
+        const d = str.substring(6, 8);
+        return `${y}-${m}-${d}`;
+      }
+      
+      const matchParts = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (matchParts) {
+        const y = matchParts[1];
+        const m = String(matchParts[2]).padStart(2, '0');
+        const d = String(matchParts[3]).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      const engMatch = str.match(/^(\d{1,2})\s+([a-zA-Z]{3,9})\s+(\d{4})$/);
+      if (engMatch) {
+        const d = String(engMatch[1]).padStart(2, '0');
+        const monthStr = engMatch[2].substring(0, 3).toLowerCase();
+        const y = engMatch[3];
+        const months = {
+          jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+          jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
+        };
+        const m = months[monthStr];
+        if (m) {
+          return `${y}-${m}-${d}`;
+        }
+      }
+
+      const parsed = Date.parse(str);
+      if (!isNaN(parsed)) {
+        const d = new Date(parsed);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      
+      return str; 
+    }
+
+    function normalizeRating(val) {
+      if (!val) return '';
+      const v = val.trim();
+      if (v === '項目1' || v === 'A') return 'A';
+      if (v === '項目2' || v === 'B') return 'B';
+      if (v === '項目3' || v === 'C') return 'C';
+      return v;
+    }
+
+    // Main parsing and cleaning engine
+    function parseAndCleanData(csvText) {
+      const parsedRows = parseCSV(csvText);
+      if (parsedRows.length <= 1) {
+        alert("資料行數不足，無法分析！");
+        return;
+      }
+      
+      // Headers
+      dataHeaders = parsedRows[0];
+      
+      // Read cleaning configs
+      const minTempLimit = parseFloat(document.getElementById('cfg-temp-min').value) || 2.0;
+      const maxTempLimit = parseFloat(document.getElementById('cfg-temp-max').value) || 8.0;
+      const standardizeBatchToggle = document.getElementById('cfg-standardize-batch').checked;
+      const removeDuplicatesToggle = document.getElementById('cfg-remove-duplicates').checked;
+      
+      cleanedData = [];
+      anomaliesList = [];
+      const seenBatches = new Set();
+      
+      let rawCount = 0;
+      
+      for (let i = 1; i < parsedRows.length; i++) {
+        const row = parsedRows[i];
+        // Skip trailing empty row
+        if (row.length === 1 && row[0].trim() === '') continue;
+        
+        rawCount++;
+        const rowIdx = i + 1; // 1-indexed Excel row
+        
+        const rawBatch = row[0] ? row[0].trim() : '';
+        const rawTemp = row[1] ? row[1].trim() : '';
+        const rawDate = row[2] ? row[2].trim() : '';
+        const rawMoisture = row[3] ? row[3].trim() : '';
+        const rawResult = row[4] ? row[4].trim() : '';
+        
+        let hasCriticalError = false;
+        
+        // Rule 1: Missing Batch
+        if (rawBatch === '') {
+          anomaliesList.push({
+            rowIdx,
+            batch: '(空)',
+            colName: '批號',
+            value: '',
+            type: 'critical',
+            msg: '批號缺失：該列數據缺乏識別標記，在清洗中已予以排除。'
+          });
+          hasCriticalError = true;
+        }
+        
+        // Standardize Batch
+        const stdBatch = standardizeBatchToggle ? standardizeBatch(rawBatch) : rawBatch.toUpperCase();
+        
+        // Rule 2: Duplicate Batch
+        if (!hasCriticalError && removeDuplicatesToggle) {
+          if (seenBatches.has(stdBatch)) {
+            anomaliesList.push({
+              rowIdx,
+              batch: rawBatch,
+              colName: '批號',
+              value: rawBatch,
+              type: 'critical',
+              msg: `重複的批號 "${stdBatch}"：先前已有相同批號記錄，在此被標記為重複並剔除。`
+            });
+            hasCriticalError = true;
+          } else {
+            seenBatches.add(stdBatch);
+          }
+        }
+        
+        // Skip the row if critical error occurred
+        if (hasCriticalError) continue;
+        
+        // Rule 3: Temperature checking
+        const parsedTemp = parseTemperature(rawTemp);
+        let tempVal = parsedTemp.value;
+        if (tempVal === null) {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '溫度',
+            value: rawTemp,
+            type: 'warning',
+            msg: `溫度無法解析: "${rawTemp}"。`
+          });
+        } else {
+          if (tempVal < minTempLimit || tempVal > maxTempLimit) {
+            anomaliesList.push({
+              rowIdx,
+              batch: rawBatch,
+              colName: '溫度',
+              value: rawTemp,
+              type: 'warning',
+              msg: `製程溫度異常：當前溫度為 ${tempVal}°C，超出安全範圍 [${minTempLimit}°C - ${maxTempLimit}°C]。`
+            });
+          }
+        }
+        
+        // Rule 4: Date checking
+        const parsedDateStr = parseDate(rawDate);
+        if (rawDate === '') {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '時間',
+            value: '',
+            type: 'warning',
+            msg: '時間缺失：該批號數據缺失檢測日期，但此列資料仍予以保留。'
+          });
+        } else if (parsedDateStr === rawDate && !/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '時間',
+            value: rawDate,
+            type: 'warning',
+            msg: `日期格式未標準化: "${rawDate}"，系統已執行強健性保留處理。`
+          });
+        }
+        
+        // Rule 5: Moisture checking
+        const normMoistureVal = normalizeRating(rawMoisture);
+        if (rawMoisture === '') {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '水分',
+            value: '',
+            type: 'warning',
+            msg: '水分數據缺失。'
+          });
+        } else if (normMoistureVal !== 'A' && normMoistureVal !== 'B' && normMoistureVal !== 'C') {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '水分',
+            value: rawMoisture,
+            type: 'warning',
+            msg: `水分評分異常值: "${rawMoisture}"，正常為項目1~3或A~C。`
+          });
+        }
+        
+        // Rule 6: Result checking
+        const normResultVal = normalizeRating(rawResult);
+        if (rawResult === '') {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '結果評分',
+            value: '',
+            type: 'warning',
+            msg: '結果評分缺失。'
+          });
+        } else if (normResultVal !== 'A' && normResultVal !== 'B' && normResultVal !== 'C') {
+          anomaliesList.push({
+            rowIdx,
+            batch: rawBatch,
+            colName: '結果評分',
+            value: rawResult,
+            type: 'warning',
+            msg: `結果評分異常值: "${rawResult}"，正常為項目1~3或A~C。`
+          });
+        }
+        
+        // Save cleaned row
+        cleanedData.push([
+          rawBatch,
+          stdBatch,
+          tempVal !== null ? tempVal : '',
+          parsedDateStr,
+          normMoistureVal,
+          normResultVal
+        ]);
+      }
+      
+      // Update global states
+      filteredCleanedData = [...cleanedData];
+      filteredAnomalies = [...anomaliesList];
+      
+      // Update top badges and stats
+      updateGlobalStats(rawCount);
+      
+      // Show results tables
+      document.getElementById('cleaned-result-panel').style.display = 'block';
+      document.getElementById('data-status-badge').className = 'badge badge-success';
+      document.getElementById('data-status-badge').textContent = '數據載入成功';
+      
+      // Render components
+      renderCleanedTable();
+      renderAnomalyTable();
+      updateAnomalyCounts();
+      
+      // Render Charts & Insights
+      renderChartsAndReports();
+    }
+
+    function updateGlobalStats(rawCount) {
+      document.getElementById('stat-total-raw').textContent = rawCount + ' 筆';
+      
+      let countA = 0;
+      let countB = 0;
+      let countC = 0;
+      
+      cleanedData.forEach(row => {
+        const rating = row[5];
+        if (rating === 'A') countA++;
+        else if (rating === 'B') countB++;
+        else if (rating === 'C') countC++;
+      });
+      
+      document.getElementById('stat-total-a').textContent = countA + ' 批';
+      document.getElementById('stat-total-b').textContent = countB + ' 批';
+      document.getElementById('stat-total-c').textContent = countC + ' 批';
+    }
+
+    function updateAnomalyCounts() {
+      const crits = anomaliesList.filter(a => a.type === 'critical').length;
+      const warns = anomaliesList.filter(a => a.type === 'warning').length;
+      
+      document.getElementById('count-critical').textContent = crits;
+      document.getElementById('count-warning').textContent = warns;
+    }
+
+    // Cleaned Data Table rendering & pagination
+    function renderCleanedTable() {
+      const tbody = document.getElementById('cleaned-table-body');
+      tbody.innerHTML = '';
+      
+      const startIdx = (cleanedPage - 1) * itemsPerPage;
+      const endIdx = Math.min(startIdx + itemsPerPage, filteredCleanedData.length);
+      
+      if (filteredCleanedData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">無篩選相符的清洗後數據。</td></tr>`;
+        document.getElementById('cleaned-page-info').textContent = `第 0 / 0 頁`;
+        document.getElementById('cleaned-prev-btn').disabled = true;
+        document.getElementById('cleaned-next-btn').disabled = true;
+        return;
+      }
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        const row = filteredCleanedData[i];
+        
+        // Determine status tag based on anomalies
+        let statusBadge = `<span class="badge badge-success">正常</span>`;
+        
+        // Check if there are warning anomalies for this row (using original batch name)
+        const rowWarnings = anomaliesList.filter(a => a.batch === row[0] && a.type === 'warning');
+        if (rowWarnings.length > 0) {
+          const hasTempErr = rowWarnings.some(w => w.colName === '溫度');
+          if (hasTempErr) {
+            statusBadge = `<span class="badge badge-danger">溫度異常</span>`;
+          } else {
+            statusBadge = `<span class="badge badge-warning">資料缺漏</span>`;
+          }
+        }
+        
+        // Custom rating classes
+        let moistureBadge = '-';
+        if (row[4] === 'A') moistureBadge = `<span class="badge badge-success" style="min-width:32px; justify-content:center;">A</span>`;
+        else if (row[4] === 'B') moistureBadge = `<span class="badge badge-warning" style="min-width:32px; justify-content:center;">B</span>`;
+        else if (row[4] === 'C') moistureBadge = `<span class="badge badge-danger" style="min-width:32px; justify-content:center;">C</span>`;
+        
+        let resultBadge = '-';
+        if (row[5] === 'A') resultBadge = `<span class="badge badge-success" style="min-width:32px; justify-content:center; font-weight:700;">A</span>`;
+        else if (row[5] === 'B') resultBadge = `<span class="badge badge-warning" style="min-width:32px; justify-content:center; font-weight:700;">B</span>`;
+        else if (row[5] === 'C') resultBadge = `<span class="badge badge-danger" style="min-width:32px; justify-content:center; font-weight:700;">C</span>`;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row[0]}</td>
+          <td style="font-weight:600; color:var(--accent-color);">${row[1]}</td>
+          <td>${row[2] !== '' ? row[2] + ' °C' : '<span style="color:var(--danger-color)">缺失</span>'}</td>
+          <td>${row[3] || '<span style="color:var(--warning-color)">缺失</span>'}</td>
+          <td>${moistureBadge}</td>
+          <td>${resultBadge}</td>
+          <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+      
+      const totalPages = Math.ceil(filteredCleanedData.length / itemsPerPage);
+      document.getElementById('cleaned-page-info').textContent = `第 ${cleanedPage} / ${totalPages} 頁`;
+      document.getElementById('cleaned-prev-btn').disabled = cleanedPage === 1;
+      document.getElementById('cleaned-next-btn').disabled = cleanedPage === totalPages;
+    }
+
+    function changeCleanedPage(dir) {
+      cleanedPage += dir;
+      renderCleanedTable();
+    }
+
+    function filterCleanedData() {
+      const q = document.getElementById('cleaned-search').value.toLowerCase().trim();
+      if (q === '') {
+        filteredCleanedData = [...cleanedData];
+      } else {
+        filteredCleanedData = cleanedData.filter(row => {
+          return row[0].toLowerCase().includes(q) || 
+                 row[1].toLowerCase().includes(q) || 
+                 row[3].toLowerCase().includes(q) ||
+                 (row[4] && row[4].toLowerCase().includes(q)) ||
+                 (row[5] && row[5].toLowerCase().includes(q));
+        });
+      }
+      cleanedPage = 1;
+      renderCleanedTable();
+    }
+
+    // Anomaly diagnostic table rendering & pagination
+    function renderAnomalyTable() {
+      const tbody = document.getElementById('anomaly-table-body');
+      tbody.innerHTML = '';
+      
+      const itemsPerAnomalyPage = 12;
+      const startIdx = (anomalyPage - 1) * itemsPerAnomalyPage;
+      const endIdx = Math.min(startIdx + itemsPerAnomalyPage, filteredAnomalies.length);
+      
+      if (filteredAnomalies.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">未發現任何異常或問題數據！資料非常健康。</td></tr>`;
+        document.getElementById('anomaly-page-info').textContent = `第 0 / 0 頁`;
+        document.getElementById('anomaly-prev-btn').disabled = true;
+        document.getElementById('anomaly-next-btn').disabled = true;
+        return;
+      }
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        const item = filteredAnomalies[i];
+        const tr = document.createElement('tr');
+        
+        let severityBadge = item.type === 'critical' 
+          ? `<span class="badge badge-danger">嚴重 (已排除)</span>`
+          : `<span class="badge badge-warning">警告 (已保留)</span>`;
+          
+        tr.innerHTML = `
+          <td>第 ${item.rowIdx} 行</td>
+          <td style="font-weight:600;">${item.batch}</td>
+          <td><span class="badge badge-info">${item.colName}</span></td>
+          <td style="font-family:monospace; font-weight: 500;">${item.value === '' ? '<span style="color:var(--text-muted); font-style:italic;">(無)</span>' : item.value}</td>
+          <td>${severityBadge}</td>
+          <td style="font-size:0.85rem; color: var(--text-main);">${item.msg}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+      
+      const totalPages = Math.ceil(filteredAnomalies.length / itemsPerAnomalyPage);
+      document.getElementById('anomaly-page-info').textContent = `第 ${anomalyPage} / ${totalPages} 頁`;
+      document.getElementById('anomaly-prev-btn').disabled = anomalyPage === 1;
+      document.getElementById('anomaly-next-btn').disabled = anomalyPage === totalPages;
+    }
+
+    function changeAnomalyPage(dir) {
+      anomalyPage += dir;
+      renderAnomalyTable();
+    }
+
+    function filterAnomalyTable(type) {
+      anomalyFilter = type;
+      document.getElementById('anomaly-filter-all').className = 'btn btn-outline';
+      document.getElementById('anomaly-filter-critical').className = 'btn btn-outline text-danger';
+      document.getElementById('anomaly-filter-warning').className = 'btn btn-outline text-warning';
+      
+      if (type === 'all') {
+        document.getElementById('anomaly-filter-all').className = 'btn btn-outline active';
+        filteredAnomalies = [...anomaliesList];
+      } else if (type === 'critical') {
+        document.getElementById('anomaly-filter-critical').className = 'btn btn-outline text-danger active';
+        filteredAnomalies = anomaliesList.filter(a => a.type === 'critical');
+      } else if (type === 'warning') {
+        document.getElementById('anomaly-filter-warning').className = 'btn btn-outline text-warning active';
+        filteredAnomalies = anomaliesList.filter(a => a.type === 'warning');
+      }
+      
+      anomalyPage = 1;
+      renderAnomalyTable();
+    }
+
+    // Charts & Summary Insights
+    function renderChartsAndReports() {
+      // Grouping data for charts
+      const totalRawCount = cleanedData.length + anomaliesList.filter(a => a.type === 'critical').length;
+      const criticalCount = anomaliesList.filter(a => a.type === 'critical').length;
+      const warningCount = anomaliesList.filter(a => a.type === 'warning').length;
+      const cleanCount = cleanedData.length;
+      
+      let moistureCounts = { A: 0, B: 0, C: 0 };
+      let resultCounts = { A: 0, B: 0, C: 0 };
+      
+      // Temperature correlation calculation grouping by Rating
+      let tempsByRating = { A: [], B: [], C: [] };
+      
+      cleanedData.forEach(row => {
+        // Moisture
+        const m = row[4];
+        if (moistureCounts[m] !== undefined) moistureCounts[m]++;
+        
+        // Result
+        const r = row[5];
+        if (resultCounts[r] !== undefined) resultCounts[r]++;
+        
+        // Temperature correlation grouping
+        const t = parseFloat(row[2]);
+        if (!isNaN(t) && r && tempsByRating[r]) {
+          tempsByRating[r].push(t);
+        }
+      });
+      
+      // Calculate Stats for table
+      let statsByRating = {};
+      ['A', 'B', 'C'].forEach(rating => {
+        const temps = tempsByRating[rating];
+        if (temps.length > 0) {
+          const sum = temps.reduce((a, b) => a + b, 0);
+          const avg = (sum / temps.length).toFixed(2);
+          const min = Math.min(...temps).toFixed(2);
+          const max = Math.max(...temps).toFixed(2);
+          statsByRating[rating] = { avg, min, max, count: temps.length };
+        } else {
+          statsByRating[rating] = { avg: '-', min: '-', max: '-', count: 0 };
+        }
+      });
+      
+      // Render temperature suitability statistics in HTML UI Table
+      document.getElementById('suit-count-a').textContent = statsByRating.A.count + ' 批';
+      document.getElementById('suit-range-a').textContent = statsByRating.A.count > 0 ? `${statsByRating.A.min} ~ ${statsByRating.A.max} °C` : '-';
+      document.getElementById('suit-avg-a').textContent = statsByRating.A.avg > 0 ? `${statsByRating.A.avg} °C` : '-';
+      
+      document.getElementById('suit-count-b').textContent = statsByRating.B.count + ' 批';
+      document.getElementById('suit-range-b').textContent = statsByRating.B.count > 0 ? `${statsByRating.B.min} ~ ${statsByRating.B.max} °C` : '-';
+      document.getElementById('suit-avg-b').textContent = statsByRating.B.avg > 0 ? `${statsByRating.B.avg} °C` : '-';
+      
+      document.getElementById('suit-count-c').textContent = statsByRating.C.count + ' 批';
+      document.getElementById('suit-range-c').textContent = statsByRating.C.count > 0 ? `${statsByRating.C.min} ~ ${statsByRating.C.max} °C` : '-';
+      document.getElementById('suit-avg-c').textContent = statsByRating.C.avg > 0 ? `${statsByRating.C.avg} °C` : '-';
+      
+      // Update dashboard charts HTML wrappers
+      document.getElementById('health-chart-wrapper').innerHTML = `<canvas id="dashHealthChart"></canvas>`;
+      document.getElementById('rating-chart-wrapper').innerHTML = `<canvas id="dashRatingChart"></canvas>`;
+      
+      // Dashboard Anomaly Breakdown
+      destroyChart('dashHealth');
+      chartInstances['dashHealth'] = new Chart(document.getElementById('dashHealthChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['無瑕疵批次', '帶警告批次', '已剔除批次'],
+          datasets: [{
+            data: [
+              cleanCount - warningCount, 
+              warningCount, 
+              criticalCount
+            ],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 1,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#1e293b', font: { family: 'Outfit' } }
+            }
+          }
+        }
+      });
+      
+      // Dashboard Ratings breakdown chart
+      destroyChart('dashRating');
+      chartInstances['dashRating'] = new Chart(document.getElementById('dashRatingChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: ['理想 A 級', '次理想 B 級', '需改善 C 級'],
+          datasets: [{
+            data: [resultCounts.A, resultCounts.B, resultCounts.C],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], // Emerald, Amber, Rose
+            borderWidth: 1,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#1e293b', font: { family: 'Outfit' } }
+            }
+          }
+        }
+      });
+      
+      // Sort cleanedData by Date for Trend chart
+      const sortedTrendData = [...cleanedData]
+        .filter(row => row[3] !== '') 
+        .sort((a, b) => new Date(a[3]) - new Date(b[3]));
+      
+      const labels = sortedTrendData.map(row => `${row[1]} (${row[3].substring(5)})`);
+      const temps = sortedTrendData.map(row => row[2]);
+      
+      // Define point colors based on rating results
+      const pointColors = sortedTrendData.map(row => {
+        const rating = row[5];
+        if (rating === 'A') return '#10b981'; // Emerald for A
+        if (rating === 'B') return '#f59e0b'; // Amber for B
+        if (rating === 'C') return '#ef4444'; // Red for C
+        return '#0284c7'; // default sky blue
+      });
+      
+      const minTempLimit = parseFloat(document.getElementById('cfg-temp-min').value) || 2.0;
+      const maxTempLimit = parseFloat(document.getElementById('cfg-temp-max').value) || 8.0;
+
+      // Render Trend Analytics line chart
+      destroyChart('tempTrend');
+      chartInstances['tempTrend'] = new Chart(document.getElementById('tempTrendChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '批次實測溫度 (°C)',
+            data: temps,
+            borderColor: '#0284c7',
+            borderWidth: 2,
+            pointBackgroundColor: pointColors,
+            pointBorderColor: '#ffffff',
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            tension: 0.2,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              grid: { color: '#e2e8f0' },
+              ticks: { color: '#64748b', font: { size: 9 } }
+            },
+            y: {
+              grid: { color: '#e2e8f0' },
+              ticks: { color: '#64748b' },
+              suggestedMin: 0,
+              suggestedMax: 10
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#1e293b' }
+            }
+          }
+        },
+        plugins: [{
+          // Shading the 2-8°C safe zone
+          beforeDraw: function(chart) {
+            const ctx = chart.ctx;
+            const yAxis = chart.scales.y;
+            const xAxis = chart.scales.x;
+            const top = yAxis.getPixelForValue(maxTempLimit);
+            const bottom = yAxis.getPixelForValue(minTempLimit);
+            
+            ctx.save();
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.04)'; // Soft green background
+            ctx.fillRect(xAxis.left, top, xAxis.width, bottom - top);
+            
+            // Draw limit lines
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.2)';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1;
+            
+            ctx.beginPath();
+            ctx.moveTo(xAxis.left, top);
+            ctx.lineTo(xAxis.right, top);
+            ctx.moveTo(xAxis.left, bottom);
+            ctx.lineTo(xAxis.right, bottom);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }]
+      });
+      
+      // Render Moisture vs Result comparison chart using custom colors
+      destroyChart('moistureResult');
+      chartInstances['moistureResult'] = new Chart(document.getElementById('moistureResultChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['A 級 (理想 - 綠色)', 'B 級 (次理想 - 黃色)', 'C 級 (需改善 - 紅色)'],
+          datasets: [
+            {
+              label: '最終結果評分',
+              data: [resultCounts.A, resultCounts.B, resultCounts.C],
+              backgroundColor: ['rgba(16, 185, 129, 0.75)', 'rgba(245, 158, 11, 0.75)', 'rgba(239, 68, 68, 0.75)'],
+              borderColor: ['#10b981', '#f59e0b', '#ef4444'],
+              borderWidth: 1.5
+            },
+            {
+              label: '水分控制評級',
+              data: [moistureCounts.A, moistureCounts.B, moistureCounts.C],
+              backgroundColor: 'rgba(2, 132, 199, 0.25)',
+              borderColor: '#0284c7',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#64748b' } },
+            y: { grid: { color: '#e2e8f0' }, ticks: { color: '#64748b', stepSize: 5 } }
+          },
+          plugins: {
+            legend: { labels: { color: '#1e293b' } }
+          }
+        }
+      });
+      
+      // Generate R&D Summary Report based on temperature-rating correlation
+      generateRNDReport(cleanCount, criticalCount, warningCount, resultCounts, statsByRating);
+    }
+
+    function destroyChart(chartId) {
+      if (chartInstances[chartId]) {
+        chartInstances[chartId].destroy();
+        delete chartInstances[chartId];
+      }
+    }
+
+    function generateRNDReport(cleanCount, criticalCount, warningCount, resultCounts, statsByRating) {
+      const passRate = (((resultCounts.A + resultCounts.B) / cleanCount) * 100).toFixed(1);
+      
+      // 1. Executive text summary
+      const summaryTextDiv = document.getElementById('report-summary-text');
+      summaryTextDiv.innerHTML = `
+        <p>本批次 <b>RND-009</b> 研發數據共包含有效清洗後數據 <b>${cleanCount}</b> 批（另排除重複或批號缺失數據 <b>${criticalCount}</b> 筆）。</p>
+        <p>經數據分析，最終產品品質與檢測評分統計如下：</p>
+        <div class="report-bullet"><i data-lucide="check-circle" class="text-success" style="width:16px;"></i> <b>理想 A 級結果：${((resultCounts.A / cleanCount)*100).toFixed(1)}%</b> (共 ${resultCounts.A} 批，為最理想的研發目標)。</div>
+        <div class="report-bullet"><i data-lucide="help-circle" class="text-warning" style="width:16px;"></i> <b>次理想 B 級結果：${((resultCounts.B / cleanCount)*100).toFixed(1)}%</b> (共 ${resultCounts.B} 批)。</div>
+        <div class="report-bullet"><i data-lucide="alert-circle" class="text-danger" style="width:16px;"></i> <b>待改善 C 級結果：${((resultCounts.C / cleanCount)*100).toFixed(1)}%</b> (共 ${resultCounts.C} 批，品質未達標)。</div>
+        <p style="margin-top: 10px;">由上可知，產出品質良好率 (A+B 級) 佔整體生產的 <b>${passRate}%</b>，研發控溫目標是消除 C 級產出，以最大化 A 級產出為準則。</p>
+      `;
+      
+      // 2. Temperature suggestions based on ratings
+      const suggestionsDiv = document.getElementById('report-suggestions');
+      let suggestionsHTML = "";
+      
+      if (statsByRating.A.count > 0) {
+        const minA = statsByRating.A.min;
+        const maxA = statsByRating.A.max;
+        const avgA = statsByRating.A.avg;
+        
+        suggestionsHTML += `
+          <div class="report-bullet">
+            <i data-lucide="award" class="text-success" style="width:20px; margin-top:2px;"></i>
+            <div>
+              <b class="text-success" style="font-size:0.95rem;">🎯 理想生產溫度判定 (A 級區間)</b>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">
+                分析結果判定：<b>最合適的生產溫度為 ${minA}°C 至 ${maxA}°C 之間</b> (平均溫度為 <b>${avgA}°C</b>)。<br>
+                在該溫度範圍內，原料的活性及水分特性最為穩定，有 100% 的機率產出理想的 A 級產出。
+              </p>
+            </div>
+          </div>
+        `;
+      } else {
+        suggestionsHTML += `
+          <div class="report-bullet">
+            <i data-lucide="award" class="text-muted" style="width:20px;"></i>
+            <div>
+              <b>理想生產溫度判定 (A 級區間)</b>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">當前資料中無理想 A 級批次，無法分析判定推薦溫度。</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      // B and C Range comparisons
+      if (statsByRating.B.count > 0 || statsByRating.C.count > 0) {
+        let compText = "";
+        if (statsByRating.B.count > 0) {
+          compText += `當溫度偏移至 <b>${statsByRating.B.min} ~ ${statsByRating.B.max}°C</b> (平均 <b>${statsByRating.B.avg}°C</b>) 時，產品易落入 B 級次理想區；`;
+        }
+        if (statsByRating.C.count > 0) {
+          compText += `而當溫度持續偏移至 <b>${statsByRating.C.min} ~ ${statsByRating.C.max}°C</b> (平均 <b>${statsByRating.C.avg}°C</b>) 時，品質會顯著衰退為 C 級待改善區。`;
+        }
+        
+        suggestionsHTML += `
+          <div class="report-bullet">
+            <i data-lucide="git-branch" class="text-warning" style="width:20px; margin-top:2px;"></i>
+            <div>
+              <b class="text-warning" style="font-size:0.95rem;">📈 溫度偏移影響評估</b>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">
+                ${compText}<br>
+                因此，<b>強烈建議研發與冷鏈工程部門將目標製程控溫目標精準鎖定在 A 級的合適區間</b>，避免設備溫度異常波動至高溫段或低溫邊緣。
+              </p>
+            </div>
+          </div>
+        `;
+      }
+      
+      suggestionsHTML += `
+        <div class="report-bullet">
+          <i data-lucide="shield-check" class="text-success" style="width:20px; margin-top:2px;"></i>
+          <div>
+            <b style="font-size:0.95rem;">💡 製程優化綜合建議</b>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">
+              除控溫外，C 級批次多伴隨水分評級為 C（即項目 3，水分偏高）。建議未來在生產控溫的基礎上，額外增強乾燥工段的抽真空時間，防範水分超標與溫度失衡造成的協同品質劣化。
+            </p>
+          </div>
+        </div>
+      `;
+      
+      suggestionsDiv.innerHTML = suggestionsHTML;
+      
+      // Re-initialize Lucide inside dynamic elements
+      lucide.createIcons();
+    }
+
+    // Download output CSV function
+    function downloadCleanedCSV() {
+      if (cleanedData.length === 0) return;
+      
+      // Assemble CSV Content
+      let csvContent = "\uFEFF"; // UTF-8 BOM to prevent MS Excel Chinese encoding problems
+      csvContent += "批號,批號,溫度(°C),日期,水分,結果評分\r\n";
+      
+      cleanedData.forEach(row => {
+        // format each cell with quotes if they contain commas
+        const formattedRow = row.map(cell => {
+          let cStr = cell !== null ? String(cell) : '';
+          if (cStr.includes(',') || cStr.includes('"') || cStr.includes('\n')) {
+            cStr = '"' + cStr.replace(/"/g, '""') + '"';
+          }
+          return cStr;
+        });
+        csvContent += formattedRow.join(",") + "\r\n";
+      });
+      
+      // Download link creation
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "RND-009_cleaned.csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
