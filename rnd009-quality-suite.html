@@ -674,6 +674,16 @@
         const filename = sanitizeCsvName(els.exportNameInput.value || "RND-009_20260604_reviewed.csv");
         els.exportNameInput.value = filename;
         const csv = "\uFEFF" + toCSV(app.headers, exportRowsMatrix());
+        // \u975C\u614B\u7DB2\u7AD9\uFF08\u5982 GitHub Pages\uFF09\u6C92\u6709\u5F8C\u7AEF\uFF0C\u76F4\u63A5\u7528\u700F\u89BD\u5668\u4E0B\u8F09\uFF0C\u4E0D\u6253\u6CE8\u5B9A\u5931\u6557\u7684 API
+        const isLocalServer = ["localhost", "127.0.0.1"].includes(location.hostname);
+        if (!isLocalServer) {
+          downloadCSV(filename, csv);
+          app.savedFileName = `${filename}\uFF08\u700F\u89BD\u5668\u4E0B\u8F09\uFF09`;
+          els.sourceLabel.textContent = `\u8CC7\u6599\u4F86\u6E90\uFF1A${app.sourceName}\uFF1B\u5831\u8868\u4F7F\u7528\u76EE\u524D\u532F\u51FA\u5167\u5BB9`;
+          renderReport();
+          showToast(`\u5DF2\u4E0B\u8F09 ${filename}`);
+          return;
+        }
         try {
           const response = await fetch("/api/save-csv", {
             method: "POST",
